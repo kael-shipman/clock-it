@@ -1,0 +1,27 @@
+{
+  "name": "@hello-world/client",
+  "version": "1.0.0",
+  "private": true,
+  "productName": "Hello World",
+  "description": "Tray client for the Hello World daemon",
+  "author": {
+    "name": "Clock It",
+    "email": "opensource@clockit.invalid"
+  },
+  "homepage": "https://example.com/hello-world",
+  "license": "GPL-3.0-only",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "node ../../scripts/build-package.mjs client",
+    "clean": "node -e \"const fs=require('node:fs');fs.rmSync('dist',{recursive:true,force:true});\"",
+    "package": "electron-builder --config electron-builder.json5",
+    "typecheck": "tsc --project tsconfig.json"
+  },
+  "dependencies": {
+    "@hello-world/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "electron": "^41.2.0",
+    "electron-builder": "^26.8.1"
+  }
+}

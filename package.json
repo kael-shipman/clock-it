@@ -1,0 +1,20 @@
+{
+  "name": "clock-it",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean && node -e \"const fs=require('node:fs');fs.rmSync('artifacts',{recursive:true,force:true});\"",
+    "package": "pnpm run build && pnpm --filter @hello-world/server bundle && pnpm --filter @hello-world/client package",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "esbuild": "^0.27.0",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.2"
+  }
+}
