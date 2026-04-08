@@ -27,7 +27,7 @@
     maintainer: "Clock It <opensource@clockit.invalid>",
     synopsis: "System tray hello-world client",
     description: "Electron system tray app that calls the local Hello World HTTP daemon and shows a notification.",
-    icon: "build/icon.png",
+    icon: "build/icons/png",
     target: [
       "deb",
       "AppImage"

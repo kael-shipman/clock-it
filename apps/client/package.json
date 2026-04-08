@@ -14,7 +14,8 @@
   "scripts": {
     "build": "node ../../scripts/build-package.mjs client",
     "clean": "node -e \"const fs=require('node:fs');fs.rmSync('dist',{recursive:true,force:true});\"",
-    "package": "electron-builder --config electron-builder.json5",
+    "generate:icons": "node ./build/generate-icons.mjs",
+    "package": "pnpm run generate:icons && electron-builder --config electron-builder.json5",
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {

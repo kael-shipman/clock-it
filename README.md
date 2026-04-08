@@ -65,6 +65,19 @@ The workflow:
 - bundles the daemon archive on Linux and macOS
 - uploads the generated artifacts for each job
 
+GitHub Releases publishing is handled by:
+
+```text
+.github/workflows/release.yml
+```
+
+That workflow can run:
+
+- automatically on tag pushes like `v1.0.0`
+- manually through `workflow_dispatch` with a tag input
+
+It rebuilds the client and server artifacts, then publishes them to a GitHub Release.
+
 ## Create distributable artifacts
 
 ```bash
@@ -111,6 +124,8 @@ Create the tray application installers with:
 pnpm --filter @hello-world/client package
 ```
 
+This automatically regenerates the icon set before packaging.
+
 On Linux, the build targets:
 
 - `deb`
@@ -146,11 +161,36 @@ If those secrets are absent, the macOS package step still produces unsigned arti
 
 Packaging resources live in `apps/client/build/`:
 
+- `generate-icons.mjs`
+- `icon.svg`
 - `icon.png`
 - `icon.ico`
 - `icon.icns`
+- `icons/png/<size>x<size>.png`
 
-These are placeholder assets and can be swapped with branded icons later.
+The icon generator produces a branded multi-size icon set for Linux, macOS, and future Windows packaging:
+
+```bash
+pnpm --filter @hello-world/client generate:icons
+```
+
+Generated sizes currently include:
+
+- `16x16`
+- `24x24`
+- `32x32`
+- `48x48`
+- `64x64`
+- `128x128`
+- `256x256`
+- `512x512`
+- `1024x1024`
+
+The generator also refreshes:
+
+- `icon.ico`
+- `icon.icns`
+- `icon.png`
 
 ## Configuration
 
@@ -188,8 +228,27 @@ Build only the tray client:
 pnpm --filter @hello-world/client build
 ```
 
+Regenerate only the icon assets:
+
+```bash
+pnpm --filter @hello-world/client generate:icons
+```
+
 Build only the daemon:
 
 ```bash
 pnpm --filter @hello-world/server build
 ```
+
+## Publishing a release
+
+To publish from GitHub Actions:
+
+1. push a version tag like `v1.0.0`, or
+2. run the `Release` workflow manually and provide a tag
+
+The release workflow uploads:
+
+- Linux tray installers (`.deb`, `.AppImage`)
+- macOS tray installers (`.dmg`, `.zip`)
+- Linux and macOS server bundles (`.tar.gz`)
