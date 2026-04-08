@@ -49,6 +49,22 @@ pnpm typecheck
 pnpm build
 ```
 
+## Continuous integration
+
+GitHub Actions builds and uploads artifacts on Linux and macOS with:
+
+```text
+.github/workflows/build-and-package.yml
+```
+
+The workflow:
+
+- installs dependencies with pnpm
+- typechecks and builds the workspace
+- packages the Electron tray client on Linux and macOS
+- bundles the daemon archive on Linux and macOS
+- uploads the generated artifacts for each job
+
 ## Create distributable artifacts
 
 ```bash
@@ -104,6 +120,37 @@ On macOS, the build targets:
 
 - `dmg`
 - `zip`
+
+### macOS signing and notarization
+
+The Electron packaging configuration is prepared for hardened runtime and optional notarization.
+
+Relevant files:
+
+- `apps/client/electron-builder.json5`
+- `apps/client/build/entitlements.mac.plist`
+- `apps/client/build/entitlements.mac.inherit.plist`
+- `apps/client/build/notarize.mjs`
+
+If these GitHub Actions secrets are configured, macOS builds can sign and notarize automatically:
+
+- `CSC_LINK`
+- `CSC_KEY_PASSWORD`
+- `APPLE_ID`
+- `APPLE_APP_SPECIFIC_PASSWORD`
+- `APPLE_TEAM_ID`
+
+If those secrets are absent, the macOS package step still produces unsigned artifacts.
+
+### Icons
+
+Packaging resources live in `apps/client/build/`:
+
+- `icon.png`
+- `icon.ico`
+- `icon.icns`
+
+These are placeholder assets and can be swapped with branded icons later.
 
 ## Configuration
 

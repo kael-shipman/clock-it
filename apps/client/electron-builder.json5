@@ -3,8 +3,10 @@
   productName: "Hello World Tray",
   artifactName: "${productName}-${version}-${os}-${arch}.${ext}",
   copyright: "Copyright (C) 2026",
+  asar: true,
   directories: {
-    output: "../../artifacts/client"
+    output: "../../artifacts/client",
+    buildResources: "build"
   },
   files: [
     "dist/**/*",
@@ -19,18 +21,25 @@
   extraMetadata: {
     main: "dist/main.js"
   },
+  afterSign: "./build/notarize.mjs",
   linux: {
     category: "Utility",
     maintainer: "Clock It <opensource@clockit.invalid>",
     synopsis: "System tray hello-world client",
     description: "Electron system tray app that calls the local Hello World HTTP daemon and shows a notification.",
+    icon: "build/icon.png",
     target: [
       "deb",
       "AppImage"
     ]
   },
   mac: {
+    hardenedRuntime: true,
     category: "public.app-category.utilities",
+    icon: "build/icon.icns",
+    entitlements: "build/entitlements.mac.plist",
+    entitlementsInherit: "build/entitlements.mac.inherit.plist",
+    gatekeeperAssess: false,
     target: [
       "dmg",
       "zip"
