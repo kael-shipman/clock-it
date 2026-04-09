@@ -4,11 +4,11 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import {
   APP_DISPLAY_NAME,
-  HelloWorldConfig,
   SERVER_LABEL,
-  ensureConfig,
-  getConfigDir,
-  writeConfig,
+  ServerConfig,
+  ensureServerConfig,
+  getUserConfigDir,
+  writeServerConfig,
 } from "@hello-world/shared";
 
 interface ServiceInstallOptions {
@@ -101,7 +101,7 @@ WantedBy=default.target
 
 function createLaunchAgentPlist(configPath: string): string {
   const entryScriptPath = getEntryScriptPath();
-  const logsDirectory = path.join(getConfigDir(), "logs");
+  const logsDirectory = path.join(getUserConfigDir(), "logs");
   const stdoutPath = path.join(logsDirectory, "server.log");
   const stderrPath = path.join(logsDirectory, "server-error.log");
 
@@ -134,19 +134,19 @@ function createLaunchAgentPlist(configPath: string): string {
 `;
 }
 
-function resolveConfig(options: ServiceInstallOptions): HelloWorldConfig {
-  const config = ensureConfig(options.configPath);
+function resolveConfig(options: ServiceInstallOptions): ServerConfig {
+  const config = ensureServerConfig(options.configPath);
 
   if (typeof options.port === "number") {
     const updatedConfig = { port: options.port };
-    writeConfig(options.configPath, updatedConfig);
+    writeServerConfig(options.configPath, updatedConfig);
     return updatedConfig;
   }
 
   return config;
 }
 
-export function installService(options: ServiceInstallOptions): HelloWorldConfig {
+export function installService(options: ServiceInstallOptions): ServerConfig {
   const config = resolveConfig(options);
 
   if (process.platform === "linux") {

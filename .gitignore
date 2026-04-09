@@ -3,4 +3,5 @@ dist
 dist-electron
 release
 artifacts
+.dev
 .DS_Store

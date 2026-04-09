@@ -2,16 +2,17 @@
 
 A cross-platform TypeScript hello-world app with:
 
-- a user-managed HTTP daemon for Linux and macOS
 - an Electron system tray client
-- packaged client installers for Linux and macOS
-- a portable server bundle that can install itself as a `systemd --user` or `launchd` service
+- a separately installable daemon server
+- native installers for Linux and macOS
+- CI/release workflows for packaging both parts
 
 ## What it does
 
 - The server listens on `127.0.0.1` using a configurable port.
 - The tray app shows one menu item: **Say hello**.
-- Clicking **Say hello** calls the local server and shows a desktop notification with `hello world`.
+- Clicking **Say hello** calls the configured server and shows a desktop notification with `hello world`.
+- If the local server installer is present, the client uses it automatically by default.
 
 ## Stack
 
@@ -19,20 +20,22 @@ A cross-platform TypeScript hello-world app with:
 - TypeScript
 - pnpm workspace
 - Electron for the tray app
-- `systemd --user` on Linux
-- `launchd` LaunchAgents on macOS
+- `systemd` system service on Linux
+- `launchd` LaunchDaemon on macOS
 
 ## Project layout
 
 ```text
 apps/
   client/   Electron tray client
-  server/   HTTP daemon + service installer
+  server/   HTTP daemon + server packaging
 packages/
   shared/   Shared config/constants
+scripts/
+  dev-client.mjs
 artifacts/
-  client/   Packaged Electron installers
-  server/   Portable daemon archive
+  client/   Built client installers
+  server/   Built server installers
 ```
 
 ## Install dependencies
@@ -42,6 +45,39 @@ corepack enable
 pnpm install
 ```
 
+## Local development
+
+The local dev flow does not require prebuilding the app. The server runs via `tsx`, and Electron is launched with the `tsx` loader.
+
+Start the server:
+
+```bash
+pnpm run dev:server
+```
+
+Start the tray client in a second terminal:
+
+```bash
+pnpm run dev:client
+```
+
+Or start both together:
+
+```bash
+pnpm run dev
+```
+
+Local dev notes:
+
+- `dev:server` stores config in `./.dev/server.json`
+- the dev server defaults to port `48123`
+- the client defaults to `http://127.0.0.1:48123`
+- you can point the client at a different server for testing:
+
+```bash
+HELLO_WORLD_SERVER_URL=http://127.0.0.1:49000 pnpm run dev:client
+```
+
 ## Build everything
 
 ```bash
@@ -49,105 +85,106 @@ pnpm typecheck
 pnpm build
 ```
 
-## Continuous integration
+## Create distributable artifacts locally
 
-GitHub Actions builds and uploads artifacts on Linux and macOS with:
-
-```text
-.github/workflows/build-and-package.yml
-```
-
-The workflow:
-
-- installs dependencies with pnpm
-- typechecks and builds the workspace
-- packages the Electron tray client on Linux and macOS
-- bundles the daemon archive on Linux and macOS
-- uploads the generated artifacts for each job
-
-GitHub Releases publishing is handled by:
-
-```text
-.github/workflows/release.yml
-```
-
-That workflow can run:
-
-- automatically on tag pushes like `v1.0.0`
-- manually through `workflow_dispatch` with a tag input
-
-It rebuilds the client and server artifacts, then publishes them to a GitHub Release.
-
-## Create distributable artifacts
+Build packages for the current OS:
 
 ```bash
 pnpm package
 ```
 
-This produces:
-
-- client installers in `artifacts/client`
-- a portable daemon archive in `artifacts/server`
-
-## Server install and service management
-
-After building, create the portable server bundle:
+Or package each side independently:
 
 ```bash
-pnpm --filter @hello-world/server bundle
+pnpm run package:server
+pnpm run package:client
 ```
 
-Extract the generated archive from `artifacts/server`, then install the user service:
+## Server installer outputs
+
+Linux:
+
+- `artifacts/server/hello-world-server_<version>_amd64.deb`
+
+macOS:
+
+- `artifacts/server/hello-world-server-<version>.pkg`
+
+The server installer:
+
+- installs the daemon files
+- installs a system-managed service automatically
+- starts the daemon automatically after install
+
+Installed server locations:
+
+- Linux config: `/etc/hello-world/server.json`
+- Linux service: `/etc/systemd/system/com.clockit.helloworld.server.service`
+- Linux runtime root: `/opt/hello-world-server`
+- macOS config: `/Library/Application Support/Hello World Server/config/server.json`
+- macOS service: `/Library/LaunchDaemons/com.clockit.helloworld.server.plist`
+- macOS runtime root: `/Library/Application Support/Hello World Server`
+
+## Client installer outputs
+
+Linux:
+
+- `.deb`
+- `.AppImage`
+
+macOS:
+
+- `.dmg`
+- `.zip`
+
+## Client configuration
+
+The client has its own user-scoped config and can optionally target a different server.
+
+Client config paths:
+
+- Linux: `~/.config/hello-world/client.json`
+- macOS: `~/Library/Application Support/Hello World/client.json`
+
+Example:
+
+```json
+{
+  "serverUrl": "http://10.0.0.15:48123"
+}
+```
+
+If `serverUrl` is omitted, the client resolves its server in this order:
+
+1. `HELLO_WORLD_SERVER_URL`
+2. `client.json`
+3. installed system server config
+4. default `http://127.0.0.1:48123`
+
+## Manual server bundle
+
+The portable user-managed server bundle still exists as an advanced/manual option:
 
 ```bash
-./install-service.sh --port 48123
+pnpm run bundle:server
 ```
 
-This installs:
+## Building and signing locally
 
-- Linux: `~/.config/systemd/user/com.clockit.helloworld.server.service`
-- macOS: `~/Library/LaunchAgents/com.clockit.helloworld.server.plist`
+### Linux
 
-The service is configured to restart on failure.
-
-To remove the daemon:
+Build the unsigned local packages:
 
 ```bash
-./uninstall-service.sh
+pnpm run package:server
+pnpm run package:client
 ```
 
-## Client packaging
+Linux packages are not cryptographically signed by default. Repository or package signing is typically handled afterward with distribution-specific tooling.
 
-Create the tray application installers with:
+### macOS client signing and notarization
 
-```bash
-pnpm --filter @hello-world/client package
-```
-
-This automatically regenerates the icon set before packaging.
-
-On Linux, the build targets:
-
-- `deb`
-- `AppImage`
-
-On macOS, the build targets:
-
-- `dmg`
-- `zip`
-
-### macOS signing and notarization
-
-The Electron packaging configuration is prepared for hardened runtime and optional notarization.
-
-Relevant files:
-
-- `apps/client/electron-builder.json5`
-- `apps/client/build/entitlements.mac.plist`
-- `apps/client/build/entitlements.mac.inherit.plist`
-- `apps/client/build/notarize.mjs`
-
-If these GitHub Actions secrets are configured, macOS builds can sign and notarize automatically:
+The Electron client package can sign and optionally notarize when these variables are set:
 
 - `CSC_LINK`
 - `CSC_KEY_PASSWORD`
@@ -155,100 +192,85 @@ If these GitHub Actions secrets are configured, macOS builds can sign and notari
 - `APPLE_APP_SPECIFIC_PASSWORD`
 - `APPLE_TEAM_ID`
 
-If those secrets are absent, the macOS package step still produces unsigned artifacts.
+Example:
 
-### Icons
+```bash
+export CSC_LINK="file:///path/to/DeveloperIDApplication.p12"
+export CSC_KEY_PASSWORD="your-password"
+export APPLE_ID="you@example.com"
+export APPLE_APP_SPECIFIC_PASSWORD="app-specific-password"
+export APPLE_TEAM_ID="TEAMID1234"
+pnpm run package:client
+```
 
-Packaging resources live in `apps/client/build/`:
+### macOS server installer signing and notarization
 
-- `generate-icons.mjs`
+The server `.pkg` installer supports optional local signing and notarization.
+
+Set:
+
+- `PKG_SIGNING_IDENTITY`
+- optionally:
+  - `APPLE_ID`
+  - `APPLE_APP_SPECIFIC_PASSWORD`
+  - `APPLE_TEAM_ID`
+
+Example:
+
+```bash
+export PKG_SIGNING_IDENTITY="Developer ID Installer: Your Name (TEAMID1234)"
+export APPLE_ID="you@example.com"
+export APPLE_APP_SPECIFIC_PASSWORD="app-specific-password"
+export APPLE_TEAM_ID="TEAMID1234"
+pnpm run package:server
+```
+
+If those variables are absent, the macOS server installer is built unsigned.
+
+## Icons
+
+Packaging resources live in `apps/client/build/`.
+
+Generate the full icon set with:
+
+```bash
+pnpm --filter @hello-world/client run generate:icons
+```
+
+Generated assets include:
+
 - `icon.svg`
 - `icon.png`
 - `icon.ico`
 - `icon.icns`
-- `icons/png/<size>x<size>.png`
+- `icons/png/*`
 
-The icon generator produces a branded multi-size icon set for Linux, macOS, and future Windows packaging:
+## Continuous integration
 
-```bash
-pnpm --filter @hello-world/client generate:icons
+CI workflow:
+
+```text
+.github/workflows/build-and-package.yml
 ```
 
-Generated sizes currently include:
+It:
 
-- `16x16`
-- `24x24`
-- `32x32`
-- `48x48`
-- `64x64`
-- `128x128`
-- `256x256`
-- `512x512`
-- `1024x1024`
+- installs dependencies
+- typechecks and builds the workspace
+- packages the client on Linux and macOS
+- packages the server installer on Linux and macOS
+- uploads distributable artifacts
 
-The generator also refreshes:
+## Release publishing
 
-- `icon.ico`
-- `icon.icns`
-- `icon.png`
+Release workflow:
 
-## Configuration
-
-The daemon and tray client both read the same config file.
-
-Default config locations:
-
-- Linux: `~/.config/hello-world/config.json`
-- macOS: `~/Library/Application Support/Hello World/config.json`
-
-Default contents:
-
-```json
-{
-  "port": 48123
-}
+```text
+.github/workflows/release.yml
 ```
 
-## Development notes
+It:
 
-Run the daemon directly:
-
-```bash
-node apps/server/dist/index.js run --port 48123
-```
-
-The server exposes:
-
-- `GET /hello`
-- `GET /healthz`
-
-Build only the tray client:
-
-```bash
-pnpm --filter @hello-world/client build
-```
-
-Regenerate only the icon assets:
-
-```bash
-pnpm --filter @hello-world/client generate:icons
-```
-
-Build only the daemon:
-
-```bash
-pnpm --filter @hello-world/server build
-```
-
-## Publishing a release
-
-To publish from GitHub Actions:
-
-1. push a version tag like `v1.0.0`, or
-2. run the `Release` workflow manually and provide a tag
-
-The release workflow uploads:
-
-- Linux tray installers (`.deb`, `.AppImage`)
-- macOS tray installers (`.dmg`, `.zip`)
-- Linux and macOS server bundles (`.tar.gz`)
+- builds release artifacts on Linux and macOS
+- publishes client and server installer artifacts to GitHub Releases
+- runs on `v*` tags or manual dispatch

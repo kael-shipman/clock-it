@@ -65,8 +65,8 @@ jobs:
             artifacts/client/*.zip
           if-no-files-found: error
 
-  bundle-server:
-    name: Bundle server (${{ matrix.os }})
+  package-server:
+    name: Package server (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -74,6 +74,12 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
+
+    env:
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      PKG_SIGNING_IDENTITY: ${{ secrets.PKG_SIGNING_IDENTITY }}
 
     steps:
       - name: Check out repository
@@ -99,12 +105,14 @@ jobs:
       - name: Build workspace
         run: pnpm build
 
-      - name: Bundle daemon archive
-        run: pnpm --filter @hello-world/server bundle
+      - name: Package server installer
+        run: pnpm --filter @hello-world/server package
 
       - name: Upload server artifacts
         uses: actions/upload-artifact@v4
         with:
           name: server-${{ runner.os }}
-          path: artifacts/server/*.tar.gz
+          path: |
+            artifacts/server/*.deb
+            artifacts/server/*.pkg
           if-no-files-found: error

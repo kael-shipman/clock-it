@@ -59,8 +59,8 @@ fs.writeFileSync(
 2. The bundled Node runtime lives at:
    ${path.relative(stagingDirectory, bundledNodePath)}
 3. Optional configuration locations:
-   - Linux: ~/.config/hello-world/config.json
-   - macOS: ~/Library/Application Support/Hello World/config.json
+   - Linux: ~/.config/hello-world/server.json
+   - macOS: ~/Library/Application Support/Hello World/server.json
 4. Install the user service:
    ./install-service.sh --port 48123
 5. Remove the user service:
@@ -68,7 +68,7 @@ fs.writeFileSync(
 6. The service will run:
    ${path.relative(stagingDirectory, bundledNodePath)} ${path.relative(stagingDirectory, bundledScriptPath)} run
 
-Example config.json:
+Example server.json:
 ${JSON.stringify({ port: 48123 }, null, 2)}
 
 The service is user-scoped:

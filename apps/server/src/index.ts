@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { ensureConfig, getConfigPath, isValidPort } from "@hello-world/shared";
+import { ensureServerConfig, getUserServerConfigPath, isValidPort } from "@hello-world/shared";
 import { startHelloWorldServer } from "./httpServer";
 import { installService, uninstallService } from "./serviceManager";
 
@@ -14,7 +14,7 @@ interface ParsedArgs {
 
 function parseArgs(argv: string[]): ParsedArgs {
   let command: Command = "run";
-  let configPath = getConfigPath();
+  let configPath = getUserServerConfigPath();
   let port: number | undefined;
 
   const commandCandidate = argv[0] as Command | undefined;
@@ -58,7 +58,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 }
 
 async function runServer(configPath: string, portOverride?: number): Promise<void> {
-  const config = ensureConfig(configPath);
+  const config = ensureServerConfig(configPath);
   const port = portOverride ?? config.port;
   const server = await startHelloWorldServer(port);
 

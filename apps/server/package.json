@@ -8,8 +8,9 @@
   ],
   "scripts": {
     "build": "node ../../scripts/build-package.mjs server",
-    "bundle": "node ./scripts/bundle.mjs",
+    "bundle": "pnpm run build && node ./scripts/bundle.mjs",
     "clean": "node -e \"const fs=require('node:fs');fs.rmSync('dist',{recursive:true,force:true});\"",
+    "package": "pnpm run build && node ./scripts/package.mjs",
     "typecheck": "tsc --project tsconfig.json"
   },
   "dependencies": {

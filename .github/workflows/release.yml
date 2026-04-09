@@ -71,8 +71,8 @@ jobs:
             artifacts/client/*.zip
           if-no-files-found: error
 
-  bundle-server:
-    name: Bundle server (${{ matrix.os }})
+  package-server:
+    name: Package server (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -80,6 +80,12 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
+
+    env:
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      PKG_SIGNING_IDENTITY: ${{ secrets.PKG_SIGNING_IDENTITY }}
 
     steps:
       - name: Check out repository
@@ -105,14 +111,16 @@ jobs:
       - name: Build workspace
         run: pnpm build
 
-      - name: Bundle daemon archive
-        run: pnpm --filter @hello-world/server bundle
+      - name: Package server installer
+        run: pnpm --filter @hello-world/server package
 
       - name: Upload release-ready server artifacts
         uses: actions/upload-artifact@v4
         with:
           name: release-server-${{ runner.os }}
-          path: artifacts/server/*.tar.gz
+          path: |
+            artifacts/server/*.deb
+            artifacts/server/*.pkg
           if-no-files-found: error
 
   publish-release:
@@ -120,7 +128,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - package-client
-      - bundle-server
+      - package-server
     env:
       RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
 
@@ -146,5 +154,5 @@ jobs:
             release-artifacts/*.AppImage
             release-artifacts/*.deb
             release-artifacts/*.dmg
+            release-artifacts/*.pkg
             release-artifacts/*.zip
-            release-artifacts/*.tar.gz

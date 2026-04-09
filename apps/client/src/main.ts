@@ -1,5 +1,10 @@
 import { app, Menu, Notification, Tray, nativeImage } from "electron";
-import { APP_DISPLAY_NAME, ensureConfig, getHelloEndpoint } from "@hello-world/shared";
+import {
+  APP_DISPLAY_NAME,
+  ensureClientConfig,
+  getHelloEndpoint,
+  resolveClientServerUrl,
+} from "@hello-world/shared";
 
 let tray: Tray | null = null;
 
@@ -33,8 +38,7 @@ function notify(body: string): void {
 
 async function sayHello(): Promise<void> {
   try {
-    const { port } = ensureConfig();
-    const response = await fetch(getHelloEndpoint(port));
+    const response = await fetch(getHelloEndpoint(resolveClientServerUrl()));
 
     if (!response.ok) {
       throw new Error(`Server responded with ${response.status}`);
@@ -69,7 +73,7 @@ function createTray(): void {
 
 app.whenReady().then(() => {
   app.setAppUserModelId("com.clockit.helloworld.client");
-  ensureConfig();
+  ensureClientConfig();
 
   if (process.platform === "darwin") {
     app.dock?.hide();
