@@ -19,11 +19,13 @@ if (!fs.existsSync(path.join(distDirectory, "index.js"))) {
 fs.rmSync(stagingDirectory, { recursive: true, force: true });
 fs.mkdirSync(path.join(stagingDirectory, "dist"), { recursive: true });
 fs.mkdirSync(path.join(stagingDirectory, "bin"), { recursive: true });
+ fs.mkdirSync(path.join(stagingDirectory, ".env"), { recursive: true });
 fs.mkdirSync(artifactsDirectory, { recursive: true });
 
 fs.cpSync(path.join(distDirectory, "index.js"), path.join(stagingDirectory, "dist", "index.js"));
 fs.cpSync(process.execPath, bundledNodePath);
 fs.cpSync(path.join(repositoryRoot, "LICENSE"), path.join(stagingDirectory, "LICENSE"));
+ fs.cpSync(path.join(appDirectory, ".env"), path.join(stagingDirectory, ".env"), { recursive: true });
 fs.writeFileSync(
   path.join(stagingDirectory, "config.sample.json"),
   JSON.stringify({ port: 48123 }, null, 2) + "\n",

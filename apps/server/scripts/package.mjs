@@ -5,6 +5,7 @@ import { execFileSync } from "node:child_process";
 const appDirectory = path.resolve(import.meta.dirname, "..");
 const repositoryRoot = path.resolve(appDirectory, "../..");
 const distDirectory = path.join(appDirectory, "dist");
+const envDirectory = path.join(appDirectory, ".env");
 const artifactsDirectory = path.join(repositoryRoot, "artifacts", "server");
 const packageJson = JSON.parse(fs.readFileSync(path.join(appDirectory, "package.json"), "utf8"));
 const version = packageJson.version;
@@ -92,14 +93,19 @@ function copyServerRuntime(targetRoot, includeDefaultConfigFile) {
   const runtimeDirectory = path.join(installRoot, "runtime", "bin");
   const distTargetDirectory = path.join(installRoot, "dist");
   const configDirectory = path.join(installRoot, "config");
+  const envTargetDirectory = path.join(installRoot, ".env");
 
   fs.mkdirSync(runtimeDirectory, { recursive: true });
   fs.mkdirSync(distTargetDirectory, { recursive: true });
   fs.mkdirSync(configDirectory, { recursive: true });
+  fs.mkdirSync(envTargetDirectory, { recursive: true });
 
   fs.cpSync(path.join(distDirectory, "index.js"), path.join(distTargetDirectory, "index.js"));
   fs.cpSync(process.execPath, path.join(runtimeDirectory, "node"));
   fs.cpSync(path.join(repositoryRoot, "LICENSE"), path.join(installRoot, "LICENSE"));
+  if (fs.existsSync(envDirectory)) {
+    fs.cpSync(envDirectory, envTargetDirectory, { recursive: true });
+  }
 
   const defaultConfigName = includeDefaultConfigFile ? "server.default.json" : "server.json";
   fs.writeFileSync(

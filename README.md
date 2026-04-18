@@ -70,12 +70,32 @@ pnpm run dev
 Local dev notes:
 
 - `dev:server` stores config in `./.dev/server.json`
+- server env config follows the Wymp `config-simple` pattern using `apps/server/.env/`
 - the dev server defaults to port `48123`
 - the client defaults to `http://127.0.0.1:48123`
 - you can point the client at a different server for testing:
 
 ```bash
 HELLO_WORLD_SERVER_URL=http://127.0.0.1:49000 pnpm run dev:client
+```
+
+Server env files:
+
+- `apps/server/.env/development`
+- `apps/server/.env/production`
+- `apps/server/.env/local`
+
+The server loads:
+
+1. `.env/<APP_ENV>` where `APP_ENV` defaults to `development`
+2. `.env/local` if present
+
+Example local override:
+
+```bash
+cat > apps/server/.env/local <<'EOF'
+PORT=49000
+EOF
 ```
 
 ## Build everything
@@ -115,6 +135,7 @@ The server installer:
 - installs the daemon files
 - installs a system-managed service automatically
 - starts the daemon automatically after install
+- includes the server `.env/` directory used by the Weenie/config-simple config layer
 
 Installed server locations:
 
@@ -226,6 +247,25 @@ pnpm run package:server
 ```
 
 If those variables are absent, the macOS server installer is built unsigned.
+
+## Server config system
+
+The server is bootstrapped as a simple Weenie app and currently exposes one dependency through the container:
+
+- `config`
+
+That config is built with `@wymp/config-simple` and follows the Wymp `.env` folder pattern:
+
+- `apps/server/.env/development`
+- `apps/server/.env/production`
+- optional `apps/server/.env/local`
+
+At runtime the server also merges in:
+
+- the file-based server config (`server.json`)
+- any CLI `--port` override
+
+The final validated config is then passed into the Weenie dependency container and from there into the HTTP handlers.
 
 ## Icons
 
