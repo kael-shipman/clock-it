@@ -1,6 +1,7 @@
 import http from "node:http";
+import type { ClockItDeps } from "./app";
 
-export function createHelloWorldServer(): http.Server {
+export function createClockItServer(deps: ClockItDeps): http.Server {
   return http.createServer((request, response) => {
     if (request.method === "GET" && request.url === "/hello") {
       response.writeHead(200, { "content-type": "application/json; charset=utf-8" });
@@ -10,7 +11,7 @@ export function createHelloWorldServer(): http.Server {
 
     if (request.method === "GET" && request.url === "/healthz") {
       response.writeHead(200, { "content-type": "application/json; charset=utf-8" });
-      response.end(JSON.stringify({ status: "ok" }));
+      response.end(JSON.stringify({ status: "ok", port: deps.config.port }));
       return;
     }
 
@@ -19,8 +20,9 @@ export function createHelloWorldServer(): http.Server {
   });
 }
 
-export async function startHelloWorldServer(port: number): Promise<http.Server> {
-  const server = createHelloWorldServer();
+export async function startClockItServer(deps: ClockItDeps): Promise<http.Server> {
+  const server = createClockItServer(deps);
+  const { port } = deps.config;
 
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);

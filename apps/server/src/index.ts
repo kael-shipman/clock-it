@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
- import { APP_DISPLAY_NAME, ensureServerConfig, getUserServerConfigPath, isValidPort } from "@clock-it/shared";
-import { startHelloWorldServer } from "./httpServer";
+import { APP_DISPLAY_NAME, getUserServerConfigPath, isValidPort } from "@clock-it/shared";
+import { createClockItDeps, loadServerConfig, startClockItApp } from "./app";
 import { installService, uninstallService } from "./serviceManager";
 
 type Command = "run" | "install-service" | "uninstall-service";
@@ -58,11 +58,11 @@ function parseArgs(argv: string[]): ParsedArgs {
 }
 
 async function runServer(configPath: string, portOverride?: number): Promise<void> {
-  const config = ensureServerConfig(configPath);
-  const port = portOverride ?? config.port;
-  const server = await startHelloWorldServer(port);
+  const config = loadServerConfig(configPath, portOverride);
+  const deps = createClockItDeps(config);
+  const server = await startClockItApp(deps);
 
-  console.log(`${APP_DISPLAY_NAME} server listening on http://127.0.0.1:${port}`);
+  console.log(`${APP_DISPLAY_NAME} server listening on http://127.0.0.1:${deps.config.port}`);
 
   const shutdown = () => {
     server.close(() => {
