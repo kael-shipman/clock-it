@@ -1,6 +1,6 @@
-# Hello World tray + daemon
+# ClockIt tray + daemon
 
-A cross-platform TypeScript hello-world app with:
+A cross-platform TypeScript ClockIt app with:
 
 - an Electron system tray client
 - a separately installable daemon server
@@ -104,11 +104,11 @@ pnpm run package:client
 
 Linux:
 
-- `artifacts/server/hello-world-server_<version>_amd64.deb`
+- `artifacts/server/clock-it-server_<version>_amd64.deb`
 
 macOS:
 
-- `artifacts/server/hello-world-server-<version>.pkg`
+- `artifacts/server/clock-it-server-<version>.pkg`
 
 The server installer:
 
@@ -118,12 +118,12 @@ The server installer:
 
 Installed server locations:
 
-- Linux config: `/etc/hello-world/server.json`
-- Linux service: `/etc/systemd/system/com.clockit.helloworld.server.service`
-- Linux runtime root: `/opt/hello-world-server`
-- macOS config: `/Library/Application Support/Hello World Server/config/server.json`
-- macOS service: `/Library/LaunchDaemons/com.clockit.helloworld.server.plist`
-- macOS runtime root: `/Library/Application Support/Hello World Server`
+- Linux config: `/etc/clock-it/server.json`
+- Linux service: `/etc/systemd/system/com.clockit.server.service`
+- Linux runtime root: `/opt/clock-it-server`
+- macOS config: `/Library/Application Support/ClockIt Server/config/server.json`
+- macOS service: `/Library/LaunchDaemons/com.clockit.server.plist`
+- macOS runtime root: `/Library/Application Support/ClockIt Server`
 
 ## Client installer outputs
 
@@ -143,8 +143,8 @@ The client has its own user-scoped config and can optionally target a different 
 
 Client config paths:
 
-- Linux: `~/.config/hello-world/client.json`
-- macOS: `~/Library/Application Support/Hello World/client.json`
+- Linux: `~/.config/clock-it/client.json`
+- macOS: `~/Library/Application Support/ClockIt/client.json`
 
 Example:
 
@@ -234,7 +234,7 @@ Packaging resources live in `apps/client/build/`.
 Generate the full icon set with:
 
 ```bash
-pnpm --filter @hello-world/client run generate:icons
+pnpm --filter @clockit/client run generate:icons
 ```
 
 Generated assets include:

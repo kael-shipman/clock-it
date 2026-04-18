@@ -1,5 +1,5 @@
 {
-  "name": "clock-it",
+  "name": "clockit",
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "engines": {
@@ -7,14 +7,14 @@
   },
   "scripts": {
     "build": "pnpm -r build",
-    "bundle:server": "pnpm --filter @hello-world/server bundle",
+    "bundle:server": "pnpm --filter @clock-it/server bundle",
     "clean": "pnpm -r clean && node -e \"const fs=require('node:fs');fs.rmSync('artifacts',{recursive:true,force:true});\"",
     "dev": "concurrently -k -n server,client -c blue,green \"pnpm run dev:server\" \"pnpm run dev:client\"",
     "dev:client": "node ./scripts/dev-client.mjs",
     "dev:server": "tsx watch apps/server/src/index.ts run --config ./.dev/server.json",
     "package": "pnpm run package:server && pnpm run package:client",
-    "package:client": "pnpm --filter @hello-world/client package",
-    "package:server": "pnpm --filter @hello-world/server package",
+    "package:client": "pnpm --filter @clock-it/client package",
+    "package:server": "pnpm --filter @clock-it/server package",
     "typecheck": "pnpm -r typecheck"
   },
   "devDependencies": {

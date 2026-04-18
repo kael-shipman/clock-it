@@ -16,14 +16,14 @@ function run(command, args, options = {}) {
   }
 }
 
-run(pnpmCommand, ["--filter", "@hello-world/client", "run", "generate:icons"]);
+run(pnpmCommand, ["--filter", "@clockit/client", "run", "generate:icons"]);
 
 const existingNodeOptions = process.env.NODE_OPTIONS?.trim();
 const nodeOptions = [existingNodeOptions, "--import=tsx"].filter(Boolean).join(" ");
 
 run(
   pnpmCommand,
-  ["--filter", "@hello-world/client", "exec", "electron", "src/main.ts"],
+  ["--filter", "@clockit/client", "exec", "electron", "src/main.ts"],
   {
     env: {
       ...process.env,

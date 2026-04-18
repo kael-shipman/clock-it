@@ -4,7 +4,7 @@ import {
   ensureClientConfig,
   getHelloEndpoint,
   resolveClientServerUrl,
-} from "@hello-world/shared";
+} from "@clock-it/shared";
 
 let tray: Tray | null = null;
 
@@ -48,7 +48,7 @@ async function sayHello(): Promise<void> {
     notify(payload.message ?? "hello world");
   } catch (error) {
     console.error(error);
-    notify("Unable to reach the Hello World server");
+    notify("Unable to reach the ClockIt server");
   }
 }
 
@@ -72,7 +72,7 @@ function createTray(): void {
 }
 
 app.whenReady().then(() => {
-  app.setAppUserModelId("com.clockit.helloworld.client");
+  app.setAppUserModelId("com.clockit.clockit.client");
   ensureClientConfig();
 
   if (process.platform === "darwin") {

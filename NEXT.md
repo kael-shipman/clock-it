@@ -21,11 +21,11 @@
 ## Config paths
 
 - Client config:
-  - Linux: `~/.config/hello-world/client.json`
-  - macOS: `~/Library/Application Support/Hello World/client.json`
+  - Linux: `~/.config/clock-it/client.json`
+  - macOS: `~/Library/Application Support/ClockIt/client.json`
 - Installed server config:
-  - Linux: `/etc/hello-world/server.json`
-  - macOS: `/Library/Application Support/Hello World Server/config/server.json`
+  - Linux: `/etc/clock-it/server.json`
+  - macOS: `/Library/Application Support/ClockIt Server/config/server.json`
 
 ## Packaging
 

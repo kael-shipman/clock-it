@@ -8,16 +8,16 @@ const distDirectory = path.join(appDirectory, "dist");
 const artifactsDirectory = path.join(repositoryRoot, "artifacts", "server");
 const packageJson = JSON.parse(fs.readFileSync(path.join(appDirectory, "package.json"), "utf8"));
 const version = packageJson.version;
-const serverLabel = "com.clockit.helloworld.server";
-const serverPackageName = "hello-world-server";
+const serverLabel = "com.clockit.clockit.server";
+const serverPackageName = "clock-it-server";
 const serverInstallRoot =
   process.platform === "darwin"
-    ? path.join("/Library", "Application Support", "Hello World Server")
+    ? path.join("/Library", "Application Support", "ClockIt Server")
     : path.join("/opt", serverPackageName);
 const serverConfigPath =
   process.platform === "darwin"
     ? path.join(serverInstallRoot, "config", "server.json")
-    : path.join("/etc", "hello-world", "server.json");
+    : path.join("/etc", "clock-it", "server.json");
 const launchDaemonPath = path.join("/Library", "LaunchDaemons", `${serverLabel}.plist`);
 const systemdServicePath = path.join("/etc", "systemd", "system", `${serverLabel}.service`);
 
@@ -41,7 +41,7 @@ function getEntryScriptAbsolutePath() {
 
 function createSystemdUnit() {
   return `[Unit]
-Description=Hello World HTTP server
+Description=ClockIt HTTP server
 After=network.target
 
 [Service]
@@ -58,7 +58,7 @@ WantedBy=multi-user.target
 }
 
 function createLaunchDaemonPlist() {
-  const logsDirectory = path.join("/Library", "Logs", "HelloWorldServer");
+  const logsDirectory = path.join("/Library", "Logs", "ClockItServer");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -132,7 +132,7 @@ function packageLinux() {
   const packageRoot = path.join(artifactsDirectory, "deb-root");
   const debPath = path.join(artifactsDirectory, `${serverPackageName}_${version}_${mapLinuxArch(process.arch)}.deb`);
   const debianDirectory = path.join(packageRoot, "DEBIAN");
-  const configDirectory = path.join(packageRoot, "etc", "hello-world");
+  const configDirectory = path.join(packageRoot, "etc", "clock-it");
   const systemdDirectory = path.join(packageRoot, "etc", "systemd", "system");
   const docsDirectory = path.join(packageRoot, "usr", "share", "doc", serverPackageName);
 
@@ -155,8 +155,8 @@ Section: utils
 Priority: optional
 Architecture: ${mapLinuxArch(process.arch)}
 Maintainer: Clock It <opensource@clockit.invalid>
-Description: Hello World daemon server
- A system-managed local HTTP daemon for the Hello World tray app.
+Description: ClockIt daemon server
+ A system-managed local HTTP daemon for the ClockIt tray app.
 `,
     "utf8",
   );
@@ -229,7 +229,7 @@ CONFIG_PATH="$CONFIG_DIR/server.json"
 PLIST_PATH="${launchDaemonPath}"
 
 mkdir -p "$CONFIG_DIR"
-mkdir -p /Library/Logs/HelloWorldServer
+mkdir -p /Library/Logs/ClockItServer
 
 if [ ! -f "$CONFIG_PATH" ]; then
   cp "$DEFAULT_CONFIG" "$CONFIG_PATH"

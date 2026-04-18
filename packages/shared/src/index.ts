@@ -2,13 +2,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-export const APP_ID = "hello-world";
-export const APP_DISPLAY_NAME = "Hello World";
-export const SERVER_DISPLAY_NAME = "Hello World Server";
-export const SERVER_LABEL = "com.clockit.helloworld.server";
+export const APP_ID = "clock-it";
+export const APP_DISPLAY_NAME = "ClockIt";
+export const SERVER_DISPLAY_NAME = "ClockIt Server";
+export const SERVER_LABEL = "com.clockit.server";
 export const DEFAULT_SERVER_HOST = "127.0.0.1";
 export const DEFAULT_PORT = 48123;
-export const SERVER_PACKAGE_NAME = "hello-world-server";
+export const SERVER_PACKAGE_NAME = "clock-it-server";
 
 export interface ServerConfig {
   port: number;

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { ensureServerConfig, getUserServerConfigPath, isValidPort } from "@hello-world/shared";
+ import { APP_DISPLAY_NAME, ensureServerConfig, getUserServerConfigPath, isValidPort } from "@clock-it/shared";
 import { startHelloWorldServer } from "./httpServer";
 import { installService, uninstallService } from "./serviceManager";
 
@@ -62,7 +62,7 @@ async function runServer(configPath: string, portOverride?: number): Promise<voi
   const port = portOverride ?? config.port;
   const server = await startHelloWorldServer(port);
 
-  console.log(`Hello World server listening on http://127.0.0.1:${port}`);
+  console.log(`${APP_DISPLAY_NAME} server listening on http://127.0.0.1:${port}`);
 
   const shutdown = () => {
     server.close(() => {
@@ -84,13 +84,13 @@ async function main(): Promise<void> {
 
   if (args.command === "install-service") {
     const config = installService({ configPath: args.configPath, port: args.port });
-    console.log(`Installed Hello World server service on port ${config.port}`);
+    console.log(`Installed ${APP_DISPLAY_NAME} server service on port ${config.port}`);
     return;
   }
 
   if (args.command === "uninstall-service") {
     uninstallService();
-    console.log("Uninstalled Hello World server service");
+    console.log(`Uninstalled ${APP_DISPLAY_NAME} server service`);
     return;
   }
 }

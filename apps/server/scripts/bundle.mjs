@@ -6,7 +6,7 @@ const appDirectory = path.resolve(import.meta.dirname, "..");
 const repositoryRoot = path.resolve(appDirectory, "../..");
 const distDirectory = path.join(appDirectory, "dist");
 const artifactsDirectory = path.join(repositoryRoot, "artifacts", "server");
-const bundleBaseName = `hello-world-server-${process.platform}-${process.arch}`;
+const bundleBaseName = `clock-it-server-${process.platform}-${process.arch}`;
 const stagingDirectory = path.join(artifactsDirectory, bundleBaseName);
 const archivePath = `${stagingDirectory}.tar.gz`;
 const bundledNodePath = path.join(stagingDirectory, "bin", "node");
@@ -52,15 +52,15 @@ SCRIPT_DIR="$(cd "$(dirname "\${BASH_SOURCE[0]}")" && pwd)"
 
 fs.writeFileSync(
   path.join(stagingDirectory, "README.txt"),
-  `Hello World server bundle
+  `ClockIt server bundle
 =========================
 
 1. Extract this archive into a permanent directory.
 2. The bundled Node runtime lives at:
    ${path.relative(stagingDirectory, bundledNodePath)}
 3. Optional configuration locations:
-   - Linux: ~/.config/hello-world/server.json
-   - macOS: ~/Library/Application Support/Hello World/server.json
+   - Linux: ~/.config/clock-it/server.json
+   - macOS: ~/Library/Application Support/ClockIt/server.json
 4. Install the user service:
    ./install-service.sh --port 48123
 5. Remove the user service:
@@ -72,12 +72,12 @@ Example server.json:
 ${JSON.stringify({ port: 48123 }, null, 2)}
 
 The service is user-scoped:
- - Linux: systemd --user unit com.clockit.helloworld.server.service
- - macOS: launchd agent com.clockit.helloworld.server
+ - Linux: systemd --user unit com.clockit.clockit.server.service
+ - macOS: launchd agent com.clockit.clockit.server
 
 Useful commands after install:
- - Linux: systemctl --user status com.clockit.helloworld.server.service
- - macOS: launchctl print gui/$(id -u)/com.clockit.helloworld.server
+ - Linux: systemctl --user status com.clockit.clockit.server.service
+ - macOS: launchctl print gui/$(id -u)/com.clockit.clockit.server
 
 The daemon listens on 127.0.0.1 and exposes:
  - GET /hello

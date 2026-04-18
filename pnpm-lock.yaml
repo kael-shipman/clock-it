@@ -29,7 +29,7 @@ importers:
 
   apps/client:
     dependencies:
-      '@hello-world/shared':
+      '@clock-it/shared':
         specifier: workspace:*
         version: link:../../packages/shared
     devDependencies:
@@ -42,7 +42,7 @@ importers:
 
   apps/server:
     dependencies:
-      '@hello-world/shared':
+      '@clock-it/shared':
         specifier: workspace:*
         version: link:../../packages/shared
 

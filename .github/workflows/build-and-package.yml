@@ -52,7 +52,7 @@ jobs:
         run: pnpm build
 
       - name: Package tray client
-        run: pnpm --filter @hello-world/client package
+        run: pnpm --filter @clockit/client package
 
       - name: Upload client artifacts
         uses: actions/upload-artifact@v4
@@ -106,7 +106,7 @@ jobs:
         run: pnpm build
 
       - name: Package server installer
-        run: pnpm --filter @hello-world/server package
+        run: pnpm --filter @clockit/server package
 
       - name: Upload server artifacts
         uses: actions/upload-artifact@v4

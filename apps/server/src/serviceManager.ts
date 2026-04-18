@@ -2,14 +2,14 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
-import {
-  APP_DISPLAY_NAME,
-  SERVER_LABEL,
-  ServerConfig,
-  ensureServerConfig,
-  getUserConfigDir,
-  writeServerConfig,
-} from "@hello-world/shared";
+ import {
+   APP_DISPLAY_NAME,
+   SERVER_LABEL,
+   ServerConfig,
+   ensureServerConfig,
+   getUserConfigDir,
+   writeServerConfig,
+ } from "@clock-it/shared";
 
 interface ServiceInstallOptions {
   configPath: string;

@@ -1,6 +1,6 @@
 {
-  appId: "com.clockit.helloworld.client",
-  productName: "Hello World Tray",
+  appId: "com.clockit.client",
+  productName: "ClockIt",
   artifactName: "${productName}-${version}-${os}-${arch}.${ext}",
   copyright: "Copyright (C) 2026",
   asar: true,
@@ -25,8 +25,8 @@
   linux: {
     category: "Utility",
     maintainer: "Clock It <opensource@clockit.invalid>",
-    synopsis: "System tray hello-world client",
-    description: "Electron system tray app that calls the local Hello World HTTP daemon and shows a notification.",
+    synopsis: "ClockIt tray client",
+    description: "Electron system tray app that calls the local ClockIt HTTP daemon and shows a notification.",
     icon: "build/icons/png",
     target: [
       "deb",
