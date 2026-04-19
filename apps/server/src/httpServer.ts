@@ -1,7 +1,11 @@
 import http from "node:http";
-import type { ClockItDeps } from "./app";
+import type { Config } from "./config";
 
-export function createClockItServer(deps: ClockItDeps): http.Server {
+type HttpDeps = {
+  config: Config;
+};
+
+export const createClockItServer = (deps: HttpDeps): http.Server => {
   return http.createServer((request, response) => {
     if (request.method === "GET" && request.url === "/hello") {
       response.writeHead(200, { "content-type": "application/json; charset=utf-8" });
@@ -18,9 +22,9 @@ export function createClockItServer(deps: ClockItDeps): http.Server {
     response.writeHead(404, { "content-type": "application/json; charset=utf-8" });
     response.end(JSON.stringify({ error: "not found" }));
   });
-}
+};
 
-export async function startClockItServer(deps: ClockItDeps): Promise<http.Server> {
+export const startClockItServer = async (deps: HttpDeps): Promise<http.Server> => {
   const server = createClockItServer(deps);
   const { port } = deps.config;
 
@@ -33,4 +37,4 @@ export async function startClockItServer(deps: ClockItDeps): Promise<http.Server
   });
 
   return server;
-}
+};

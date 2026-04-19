@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import dotenv from "dotenv";
-import { REQUIRED, configValue, validate, Validators } from "@wymp/config-simple";
-import { ensureServerConfig } from "@clock-it/shared";
+import { merge } from "es-toolkit/object";
+import { DEFAULT_PORT, ensureServerConfig } from "@clock-it/shared";
+import { configValue, validate, Validators } from "@wymp/config-simple";
 
 const ENVIRONMENT = {
   development: "development",
@@ -12,61 +13,33 @@ const ENVIRONMENT = {
 
 type Environment = (typeof ENVIRONMENT)[keyof typeof ENVIRONMENT];
 
-function loadEnvFiles(): Environment {
-  const environment = configValue(
-    "APP_ENV",
-    ENVIRONMENT.development,
-    Validators.oneOf(Object.values(ENVIRONMENT)),
-  ) as Environment;
-  const serverRoot = path.resolve(__dirname, "..");
-  const envDirectory = path.join(serverRoot, ".env");
+const loadEnvFiles = (): Environment => {
+  const env = configValue("APP_ENV", ENVIRONMENT.development, Validators.oneOf(Object.values(ENVIRONMENT))) as Environment;
+  const envDirectory = path.resolve(__dirname, "..", ".env");
 
-  for (const relativePath of [path.join(envDirectory, environment), path.join(envDirectory, "local")]) {
-    if (fs.existsSync(relativePath)) {
-      dotenv.config({ path: relativePath, override: true });
+  for (const filePath of [path.join(envDirectory, "local"), path.join(envDirectory, env)]) {
+    if (fs.existsSync(filePath)) {
+      dotenv.config({ path: filePath, override: false });
     }
   }
 
-  return environment;
-}
+  return env;
+};
 
-function buildConfigDefinition() {
+const buildConfig = () => {
   const env = loadEnvFiles();
 
   return {
     env,
-    port: configValue("PORT", "num", REQUIRED),
+    port: configValue("PORT", "num", DEFAULT_PORT),
   };
-}
+};
 
-export interface ServerRuntimeConfig {
-  env: Environment;
-  port: number;
-}
+export type Config = ReturnType<typeof createServerRuntimeConfig>;
 
-export function createServerRuntimeConfig(): ServerRuntimeConfig {
-  const result = validate(buildConfigDefinition(), "dont-throw");
-  if (result.t === "error") {
-    throw new Error(`Invalid runtime configuration:\n\n  * ${result.errors.join("\n  * ")}`);
-  }
+export const createServerRuntimeConfig = () => validate(buildConfig());
 
-  return result.value;
-}
-
-export function loadRuntimeServerConfig(configPath: string, portOverride?: number): ServerRuntimeConfig {
-  const fileConfig = ensureServerConfig(configPath);
-
-  const runtimePort = typeof portOverride === "number" ? portOverride : fileConfig.port;
-  const previousPort = process.env.PORT;
-  process.env.PORT = String(runtimePort);
-
-  try {
-    return createServerRuntimeConfig();
-  } finally {
-    if (previousPort === undefined) {
-      delete process.env.PORT;
-    } else {
-      process.env.PORT = previousPort;
-    }
-  }
-}
+export const loadRuntimeServerConfig = (configPath: string, portOverride?: number): Config => {
+  const merged = merge({ ...createServerRuntimeConfig() }, ensureServerConfig(configPath));
+  return typeof portOverride === "number" ? merge(merged, { port: portOverride }) : merged;
+};

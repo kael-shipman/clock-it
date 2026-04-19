@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { APP_DISPLAY_NAME, getUserServerConfigPath, isValidPort } from "@clock-it/shared";
-import { createClockItDeps, loadServerConfig, startClockItApp } from "./app";
+import { getProdDeps } from "./app";
 import { installService, uninstallService } from "./serviceManager";
 
 type Command = "run" | "install-service" | "uninstall-service";
@@ -12,7 +12,7 @@ interface ParsedArgs {
   port?: number;
 }
 
-function parseArgs(argv: string[]): ParsedArgs {
+const parseArgs = (argv: string[]): ParsedArgs => {
   let command: Command = "run";
   let configPath = getUserServerConfigPath();
   let port: number | undefined;
@@ -55,12 +55,11 @@ function parseArgs(argv: string[]): ParsedArgs {
   }
 
   return { command, configPath, port };
-}
+};
 
-async function runServer(configPath: string, portOverride?: number): Promise<void> {
-  const config = loadServerConfig(configPath, portOverride);
-  const deps = createClockItDeps(config);
-  const server = await startClockItApp(deps);
+const runServer = async (configPath: string, portOverride?: number): Promise<void> => {
+  const { deps } = await getProdDeps({ configPath, portOverride });
+  const server = deps.http;
 
   console.log(`${APP_DISPLAY_NAME} server listening on http://127.0.0.1:${deps.config.port}`);
 
@@ -72,9 +71,9 @@ async function runServer(configPath: string, portOverride?: number): Promise<voi
 
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
-}
+};
 
-async function main(): Promise<void> {
+const main = async (): Promise<void> => {
   const args = parseArgs(process.argv.slice(2));
 
   if (args.command === "run") {
@@ -93,7 +92,7 @@ async function main(): Promise<void> {
     console.log(`Uninstalled ${APP_DISPLAY_NAME} server service`);
     return;
   }
-}
+};
 
 main().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);

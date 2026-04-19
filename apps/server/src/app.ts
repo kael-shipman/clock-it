@@ -1,26 +1,40 @@
 import http from "node:http";
-import { Weenie } from "@wymp/weenie-framework";
-import { type ServerRuntimeConfig, createServerRuntimeConfig, loadRuntimeServerConfig } from "./config";
+import { Weenie } from "@wymp/weenie-base";
+import { Config, createServerRuntimeConfig, loadRuntimeServerConfig } from "./config";
 import { createClockItServer, startClockItServer } from "./httpServer";
 
-type RawClockItDeps = ReturnType<ReturnType<typeof Weenie<{ config: ServerRuntimeConfig }>>["done"]>;
-
-export type ClockItDeps = RawClockItDeps & {
-  config: ServerRuntimeConfig;
+export type BaseDeps = {
+  config: Config;
 };
 
-export function createClockItDeps(configOverrides?: ServerRuntimeConfig): ClockItDeps {
-  const config = configOverrides ?? createServerRuntimeConfig();
+export type Deps = BaseDeps & {
+  http: http.Server;
+};
 
-  return Weenie({ config }).done((deps) => deps) as ClockItDeps;
-}
+export const getProdDeps = async ({
+  configPath,
+  portOverride,
+}: {
+  configPath: string;
+  portOverride?: number;
+}) => {
+  const deps = await Weenie({ config: loadRuntimeServerConfig(configPath, portOverride) })
+    .and((d: BaseDeps) => ({
+      http: createClockItServer(d),
+    }))
+    .done(async (d) => ({
+      config: d.config,
+      http: d.http,
+    }));
 
-export function createClockItApp(deps: ClockItDeps): http.Server {
-  return createClockItServer(deps);
-}
+  return {
+    deps,
+    shutdown: async () => Promise.resolve(),
+  };
+};
 
-export async function startClockItApp(deps: ClockItDeps): Promise<http.Server> {
-  return startClockItServer(deps);
-}
+export const createClockItApp = (deps: Deps): http.Server => createClockItServer(deps);
 
-export { loadRuntimeServerConfig as loadServerConfig };
+export const startClockItApp = async (deps: Deps): Promise<http.Server> => startClockItServer(deps);
+
+export { createServerRuntimeConfig };
