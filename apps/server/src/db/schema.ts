@@ -1,5 +1,3 @@
-import type { ColumnType, Generated } from "kysely";
-
 export interface KyselyMigrationsTable {
   name: string;
   timestamp: string;
@@ -11,6 +9,11 @@ export interface KyselyMigrationLockTable {
 }
 
 export interface DatabaseSchema {
+  clients: {
+    archived_at: string | null;
+    id: string;
+    name: string;
+  };
   clockit_meta: {
     key: string;
     value: string;
