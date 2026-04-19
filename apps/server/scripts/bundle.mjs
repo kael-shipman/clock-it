@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 
+const require = createRequire(import.meta.url);
 const appDirectory = path.resolve(import.meta.dirname, "..");
 const repositoryRoot = path.resolve(appDirectory, "../..");
 const distDirectory = path.join(appDirectory, "dist");
@@ -23,6 +25,41 @@ fs.mkdirSync(path.join(stagingDirectory, "bin"), { recursive: true });
 fs.mkdirSync(artifactsDirectory, { recursive: true });
 
 fs.cpSync(path.join(distDirectory, "index.js"), path.join(stagingDirectory, "dist", "index.js"));
+const migrationsDist = path.join(distDirectory, "migrations");
+if (fs.existsSync(migrationsDist)) {
+  fs.cpSync(migrationsDist, path.join(stagingDirectory, "dist", "migrations"), { recursive: true });
+}
+
+const stagingNodeModules = path.join(stagingDirectory, "node_modules");
+fs.mkdirSync(stagingNodeModules, { recursive: true });
+
+const copiedPackages = new Set();
+
+const readDependencyNames = (packageRoot) => {
+  const packageJsonPath = path.join(packageRoot, "package.json");
+  const { dependencies = {}, optionalDependencies = {} } = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+  return Object.keys({ ...dependencies, ...optionalDependencies });
+};
+
+const copyPackageTree = (packageName, resolverPaths) => {
+  if (copiedPackages.has(packageName)) {
+    return;
+  }
+
+  copiedPackages.add(packageName);
+  const packageRoot = path.dirname(require.resolve(`${packageName}/package.json`, { paths: resolverPaths }));
+  fs.cpSync(packageRoot, path.join(stagingNodeModules, packageName), { recursive: true });
+
+  const clusterRoot = path.resolve(packageRoot, "..");
+  const nextPaths = [clusterRoot, stagingNodeModules, appDirectory, repositoryRoot];
+
+  for (const dependencyName of readDependencyNames(packageRoot)) {
+    copyPackageTree(dependencyName, nextPaths);
+  }
+};
+
+copyPackageTree("better-sqlite3", [appDirectory, repositoryRoot]);
+
 fs.cpSync(process.execPath, bundledNodePath);
 fs.cpSync(path.join(repositoryRoot, "LICENSE"), path.join(stagingDirectory, "LICENSE"));
  fs.cpSync(path.join(appDirectory, ".env"), path.join(stagingDirectory, ".env"), { recursive: true });

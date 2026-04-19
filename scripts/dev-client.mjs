@@ -16,18 +16,20 @@ function run(command, args, options = {}) {
   }
 }
 
-run(pnpmCommand, ["--filter", "@clockit/client", "run", "generate:icons"]);
+run(pnpmCommand, ["--filter", "@clock-it/client", "run", "generate:icons"]);
 
 const existingNodeOptions = process.env.NODE_OPTIONS?.trim();
 const nodeOptions = [existingNodeOptions, "--import=tsx"].filter(Boolean).join(" ");
 
+// Cursor (and some other hosts) set ELECTRON_RUN_AS_NODE=1, which makes `require("electron")`
+// resolve to the binary path string instead of the Electron API — unset for a real app process.
+const electronEnv = { ...process.env, NODE_OPTIONS: nodeOptions };
+delete electronEnv.ELECTRON_RUN_AS_NODE;
+
 run(
   pnpmCommand,
-  ["--filter", "@clockit/client", "exec", "electron", "src/main.ts"],
+  ["--filter", "@clock-it/client", "exec", "electron", "src/main.ts"],
   {
-    env: {
-      ...process.env,
-      NODE_OPTIONS: nodeOptions,
-    },
+    env: electronEnv,
   },
 );

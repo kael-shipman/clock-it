@@ -33,7 +33,10 @@ export function getDefaultServerDbPath(
   homeDir: string = os.homedir(),
 ): string {
   if ((env.APP_ENV ?? "development").toLowerCase() === "development") {
-    return path.join("/workspace", "apps", "server", ".dev", "db.sqlite");
+    const workspaceRoot = "/workspace";
+    if (fs.existsSync(workspaceRoot)) {
+      return path.join(workspaceRoot, "apps", "server", ".dev", "db.sqlite");
+    }
   }
 
   return path.join(getUserConfigDir(platform, env, homeDir), "db.sqlite");
