@@ -12,6 +12,7 @@ export const SERVER_PACKAGE_NAME = "clock-it-server";
 
 export interface ServerConfig {
   port: number;
+  dbPath?: string;
 }
 
 export interface ClientConfig {
@@ -24,6 +25,18 @@ export function isValidPort(value: number): boolean {
 
 export function getDefaultServerConfig(): ServerConfig {
   return { port: DEFAULT_PORT };
+}
+
+export function getDefaultServerDbPath(
+  platform: NodeJS.Platform = process.platform,
+  env: NodeJS.ProcessEnv = process.env,
+  homeDir: string = os.homedir(),
+): string {
+  if ((env.APP_ENV ?? "development").toLowerCase() === "development") {
+    return path.join("/workspace", "apps", "server", ".dev", "db.sqlite");
+  }
+
+  return path.join(getUserConfigDir(platform, env, homeDir), "db.sqlite");
 }
 
 export function getDefaultServerBaseUrl(port = DEFAULT_PORT): string {
@@ -112,12 +125,20 @@ export function readServerConfig(configPath = getUserServerConfigPath()): Server
     throw new Error(`Invalid server port in config file: ${configPath}`);
   }
 
-  return { port: parsed.port };
+  if (parsed.dbPath !== undefined && typeof parsed.dbPath !== "string") {
+    throw new Error(`Invalid dbPath in server config file: ${configPath}`);
+  }
+
+  return { port: parsed.port, dbPath: parsed.dbPath };
 }
 
 export function writeServerConfig(configPath: string, config: ServerConfig): void {
   if (!isValidPort(config.port)) {
     throw new Error(`Invalid port: ${config.port}`);
+  }
+
+  if (config.dbPath !== undefined && typeof config.dbPath !== "string") {
+    throw new Error(`Invalid dbPath: ${String(config.dbPath)}`);
   }
 
   fs.mkdirSync(path.dirname(configPath), { recursive: true });

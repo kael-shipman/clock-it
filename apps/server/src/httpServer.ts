@@ -1,8 +1,11 @@
 import http from "node:http";
+import type { Kysely } from "kysely";
 import type { Config } from "./config";
+import type { DatabaseSchema } from "./db/schema";
 
 type HttpDeps = {
   config: Config;
+  db: Kysely<DatabaseSchema>;
 };
 
 export const createClockItServer = (deps: HttpDeps): http.Server => {

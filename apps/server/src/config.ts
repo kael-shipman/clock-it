@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import dotenv from "dotenv";
 import { merge } from "es-toolkit/object";
-import { DEFAULT_PORT, ensureServerConfig } from "@clock-it/shared";
+import { DEFAULT_PORT, ensureServerConfig, getDefaultServerDbPath } from "@clock-it/shared";
 import { configValue, validate, Validators } from "@wymp/config-simple";
 
 const ENVIRONMENT = {
@@ -12,6 +12,9 @@ const ENVIRONMENT = {
 } as const;
 
 type Environment = (typeof ENVIRONMENT)[keyof typeof ENVIRONMENT];
+
+const getDefaultDbPath = (env: Environment) =>
+  getDefaultServerDbPath(undefined, { APP_ENV: env });
 
 const loadEnvFiles = (): Environment => {
   const env = configValue("APP_ENV", ENVIRONMENT.development, Validators.oneOf(Object.values(ENVIRONMENT))) as Environment;
@@ -30,6 +33,9 @@ const buildConfig = () => {
   const env = loadEnvFiles();
 
   return {
+    db: {
+      path: configValue("SQLITE_PATH", getDefaultDbPath(env)),
+    },
     env,
     port: configValue("PORT", "num", DEFAULT_PORT),
   };

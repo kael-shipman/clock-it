@@ -4,4 +4,5 @@ dist-electron
 release
 artifacts
 .dev
+.dev/db.sqlite
 .DS_Store

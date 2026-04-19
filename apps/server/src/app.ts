@@ -1,15 +1,17 @@
 import http from "node:http";
 import { Weenie } from "@wymp/weenie-base";
 import { Config, createServerRuntimeConfig, loadRuntimeServerConfig } from "./config";
+import { createDatabaseDependency, type DbDependency } from "./db/dependency";
 import { createClockItServer, startClockItServer } from "./httpServer";
 
 export type BaseDeps = {
   config: Config;
 };
 
-export type Deps = BaseDeps & {
-  http: http.Server;
-};
+export type Deps = BaseDeps &
+  DbDependency & {
+    http: http.Server;
+  };
 
 export const getProdDeps = async ({
   configPath,
@@ -18,18 +20,25 @@ export const getProdDeps = async ({
   configPath: string;
   portOverride?: number;
 }) => {
-  const deps = await Weenie({ config: loadRuntimeServerConfig(configPath, portOverride) })
-    .and((d: BaseDeps) => ({
+  const baseConfig = loadRuntimeServerConfig(configPath, portOverride);
+  const dbDependency = await createDatabaseDependency({ config: baseConfig });
+
+  const deps = await Weenie({ config: baseConfig })
+    .and(() => dbDependency)
+    .and((d: BaseDeps & DbDependency) => ({
       http: createClockItServer(d),
     }))
-    .done(async (d) => ({
+    .done(async (d: BaseDeps & DbDependency & { http: http.Server }) => ({
       config: d.config,
+      db: d.db,
       http: d.http,
     }));
 
   return {
     deps,
-    shutdown: async () => Promise.resolve(),
+    shutdown: async () => {
+      await deps.db.destroy();
+    },
   };
 };
 
