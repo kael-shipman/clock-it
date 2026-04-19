@@ -1,0 +1,10 @@
+packages:
+  - apps/*
+  - packages/*
+allowBuilds:
+  '@wymp/http-errors': true
+  '@wymp/http-utils': true
+  better-sqlite3: true
+  electron: true
+  electron-winstaller: true
+  esbuild: true

@@ -1,0 +1,28 @@
+{
+  "name": "@clock-it/client",
+  "version": "1.0.0",
+  "private": true,
+  "productName": "ClockIt",
+  "description": "Tray client for the ClockIt daemon",
+  "author": {
+    "name": "Clock It",
+    "email": "opensource@clockit.invalid"
+  },
+  "homepage": "https://example.com/clock-it",
+  "license": "GPL-3.0-only",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "node ../../scripts/build-package.mjs client",
+    "clean": "node -e \"const fs=require('node:fs');fs.rmSync('dist',{recursive:true,force:true});\"",
+    "generate:icons": "node ./build/generate-icons.mjs",
+    "package": "pnpm run build && pnpm run generate:icons && electron-builder --config electron-builder.json5",
+    "typecheck": "tsc --project tsconfig.json"
+  },
+  "dependencies": {
+    "@clock-it/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "electron": "^41.2.0",
+    "electron-builder": "^26.8.1"
+  }
+}

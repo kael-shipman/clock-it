@@ -1,0 +1,48 @@
+{
+  appId: "com.clockit.client",
+  productName: "ClockIt",
+  artifactName: "${productName}-${version}-${os}-${arch}.${ext}",
+  copyright: "Copyright (C) 2026",
+  asar: true,
+  directories: {
+    output: "../../artifacts/client",
+    buildResources: "build"
+  },
+  files: [
+    "dist/**/*",
+    "package.json"
+  ],
+  extraResources: [
+    {
+      from: "../../LICENSE",
+      to: "LICENSE"
+    }
+  ],
+  extraMetadata: {
+    main: "dist/main.js"
+  },
+  afterSign: "./build/notarize.mjs",
+  linux: {
+    category: "Utility",
+    maintainer: "Clock It <opensource@clockit.invalid>",
+    synopsis: "ClockIt tray client",
+    description: "Electron system tray app that calls the local ClockIt HTTP daemon and shows a notification.",
+    icon: "build/icons/png",
+    target: [
+      "deb",
+      "AppImage"
+    ]
+  },
+  mac: {
+    hardenedRuntime: true,
+    category: "public.app-category.utilities",
+    icon: "build/icon.icns",
+    entitlements: "build/entitlements.mac.plist",
+    entitlementsInherit: "build/entitlements.mac.inherit.plist",
+    gatekeeperAssess: false,
+    target: [
+      "dmg",
+      "zip"
+    ]
+  }
+}
